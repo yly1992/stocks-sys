@@ -1,5 +1,7 @@
 package model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,25 +11,27 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name ="alerts")
-public class Alert {
-   
+public class Alert implements Serializable {
+
+   private static final long serialVersionUID = 1L;
+	
    @Id
    @GeneratedValue(strategy=GenerationType.AUTO)
-   @Column(name="id")
-   private String id;
-   @Column(name="active")
+   @Column(name="alert_id",nullable = false)
+   private Integer alert_id;
+   @Column(name="active", nullable = true)
    private Boolean active;
-   @Column(name="expression")
+   @Column(name="expression", nullable = true)
    private String expression;
-   @Column(name="name")
+   @Column(name="name", nullable = true)
    private String name;
-   @Column(name="description")
+   @Column(name="description", nullable = true)
    private String description;
-   @Column(name="sendEmail")
+   @Column(name="sendEmail", nullable = true)
    private Boolean sendEmail;
-   @Column(name="symbol")
+   @Column(name="symbol", nullable = true)
    private String symbol;
-   @Column(name="opposedAlertId")
+   @Column(name="opposedAlertId", nullable = true)
    private String opposedAlertId;
    
    
@@ -90,18 +94,18 @@ public class Alert {
       this.sendEmail = sendEmail;
    }
 
-   public String getId() {
-      return id;
+   public Integer getAlert_Id() {
+      return alert_id;
    }
 
-   public void setId( String id ) {
-      this.id = id;
+   public void setAlert_Id( Integer id ) {
+      this.alert_id = alert_id;
    }
    
    @Override
    public String toString() {
        return "Alert{" +
-               "id=" + id +
+               "id=" + alert_id +
                ", active='" + active + '\'' +
                ", expression='" + expression + '\'' +
                ", name='" + name + '\'' +
