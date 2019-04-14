@@ -35,6 +35,15 @@ public class StockService implements IStockService{
       return new StockWrapper( yahooFinanceService.getStock( normalizeSymbol( symbol ) ) );
    }
    
+   public Map<String,IStockWrapper> getStocks( String[] symbols ) throws IOException{
+	      normalizeSymbols( symbols );
+	      Map<String,IStockWrapper> resultMap = new HashMap<String,IStockWrapper>();
+	      Map<String, Stock> yahooMap = yahooFinanceService.getStocks( symbols );
+	      for(String symbol :  yahooMap.keySet()){
+	         resultMap.put( symbol, new StockWrapper( yahooMap.get( symbol ) ) );
+	      }
+	      return resultMap;
+	   }
   
    private String normalizeSymbol(String symbol){
       return symbol.toUpperCase().trim();
@@ -92,10 +101,5 @@ public void updateDBHistory(Integer year, String symbol) {
 	
 }
 
-
-public Map<String, IStockWrapper> getStocks(String[] symbol) throws IOException {
-	// TODO Auto-generated method stub
-	return null;
-}
    
 }
