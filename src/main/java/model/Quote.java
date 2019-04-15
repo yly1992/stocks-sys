@@ -5,10 +5,13 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.quotes.stock.StockQuote;
 
 @Entity
+@Table(name ="quotes")
 public class Quote {
    
    @EmbeddedId
