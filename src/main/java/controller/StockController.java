@@ -55,17 +55,12 @@ public class StockController {
       return stockService.getHistory( symbol );
    }
    
-//   @RequestMapping(value="/{symbol:.+}" ,method = RequestMethod.DELETE)
-//   public ResponseEntity<HttpStatus> delete(@PathVariable("symbol") String symbol ) throws IOException {
-//      stockService.deleteStock( symbol );
-//      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
-//   }
-   
-//   @RequestMapping(value= "/history/{year}", method = RequestMethod.PUT)
-//   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year ) throws IOException {
-//      stockService.autoUpdateDBHistory( year );
-//      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
-//   }
+   @RequestMapping(value= "/historyyear/{year:.+}", method = RequestMethod.GET)
+   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year ) throws IOException {
+	   System.out.println("year "+ year);
+      stockService.autoUpdateDBHistory( year );
+      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
+   }
    
 //   @RequestMapping(value= "/history/{year}/{symbol:.+}", method = RequestMethod.PUT)
 //   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year, @PathVariable("symbol") String symbol ) throws IOException {

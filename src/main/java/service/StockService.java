@@ -161,9 +161,17 @@ public void deleteStock(String symbol) {
 	
 }
 
-public void autoUpdateDBHistory(Integer fromYear) {
-	// TODO Auto-generated method stub
-	
+@Transactional
+public void autoUpdateDBHistory( Integer year ) {
+   if(year == null){
+      return;
+   }
+   Calendar from = Calendar.getInstance();
+   from.set( Calendar.YEAR, year );
+   from.set( Calendar.MONTH, 0 );
+   from.set( Calendar.DATE, 1 );
+   List<String> symbols = getSymbols();
+   autoLoadDB( symbols.toArray( new String[symbols.size()] ), from, Calendar.getInstance() );
 }
 
 public void updateDBHistory(Integer year, String symbol) {
@@ -178,10 +186,10 @@ public void importQuotes(Collection<Quote> quotes){
    }
 }
 
-public List<String> getSymbols() {
-	// TODO Auto-generated method stub
-	return null;
-}
+@Transactional
+public List<String> getSymbols(){
+    return quoteDAO.getLoadedSymbols();
+ }
 
 public void updateDBJob() {
 	// TODO Auto-generated method stub
