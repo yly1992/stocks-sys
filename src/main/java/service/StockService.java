@@ -174,9 +174,23 @@ public void autoUpdateDBHistory( Integer year ) {
    autoLoadDB( symbols.toArray( new String[symbols.size()] ), from, Calendar.getInstance() );
 }
 
-public void updateDBHistory(Integer year, String symbol) {
-	// TODO Auto-generated method stub
-	
+@Transactional
+public void updateDBHistory( Integer year, String symbol ) {
+   if(year == null || symbol == null){
+      return;
+   }
+   Calendar from = Calendar.getInstance();
+   from.set( Calendar.YEAR, year );
+   from.set( Calendar.MONTH, 0 );
+   from.set( Calendar.DATE, 1 );
+   List<HistoricalQuote> history;
+   try {
+      history = yahooFinanceService.getHistory( symbol, from, Calendar.getInstance() );
+      importQuotes( historyToQuotes( history ) );
+   } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException( e.getMessage() );
+   }
 }
 
 @Transactional
