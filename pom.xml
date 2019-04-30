@@ -86,6 +86,12 @@
 	    <artifactId>spring-tx</artifactId>
 	    <version>4.3.5.RELEASE</version>
     </dependency>
+    
+    <dependency>
+	    <groupId>cn.apiclub.third</groupId>
+	    <artifactId>jgap</artifactId>
+	    <version>3.6.2</version>
+	</dependency>
 
     </dependencies>
     
