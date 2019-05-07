@@ -166,6 +166,7 @@ public class Simulation {
       Calendar to = new GregorianCalendar(parameters.getYearTo()-1,11,31);
       int indexInFromYear = 0;
       Map<String, List<Quote>> map = stockService.getHistory( parameters.getSymbols(), from, to );
+
       List<String> unknownSymbols = new ArrayList<String>();
       for(String symbol : parameters.getSymbols()){
          quotesAux = map.get( symbol );
@@ -173,6 +174,9 @@ public class Simulation {
             unknownSymbols.add( symbol );
             continue;
          }
+//quoteAux dates is DESC Order.          
+//System.out.println("abc "+ quotesAux.get(0).getId().getDate().getTimeInMillis() + " " + quotesAux.get(1).getId().getDate().getTimeInMillis() + " "+ quotesAux.get(2).getId().getDate().getTimeInMillis());
+         
          indexInFromYear = extractIndexInFromYear( quotesAux );
          allTheQuotes.addAll( quotesAux.subList( 0, indexInFromYear + 1 ) );
          indexPerSymbolMap.put( symbol, indexInFromYear );
