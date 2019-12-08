@@ -30,7 +30,8 @@ public class MACDSignalLine extends AbstractFormula {
          macd = new MACD( fastPeriod, slowPeriod, quotes.subList( i, quotes.size() ) );
          macdValue = macd.calculate();
          macdQuote = new Quote();
-         macdQuote.setId( quotes.get( i ).getId() );
+         macdQuote.setSymbol( quotes.get( i ).getSymbol() );
+         macdQuote.setDate( quotes.get(i).getDate());
          macdQuote.setClose( macdValue );
          macdQuote.setVolume( quotes.get( i ).getVolume() );
          //Quotes always must be in descending order

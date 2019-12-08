@@ -20,24 +20,25 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RestController
 @RequestMapping("/alerts")
 public class AlertController {
-   
-   @Autowired
-   private AlertService alertService;
-   
-  
-   @RequestMapping(value= "/alert", method = RequestMethod.GET)
-   public ResponseEntity<HttpStatus> createAlert() throws IOException {
-	  Alert alert = new Alert();
-	  alert.setAlert_Id(12345);
-	  alert.setActive(true);
-	  alert.setDescription("ba lallalalal ");
-	  alert.setExpression("a b c");
-	  alert.setName("niu bi");
-	  alert.setSymbol("AAPL");
-	  System.out.println("alert "+ alert.getAlert_Id());
-      alertService.saveAlert( alert);
-      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
-   }
-   
-  
+
+    @Autowired
+    private AlertService alertService;
+
+
+    @RequestMapping(value= "/alert", method = RequestMethod.GET)
+    public ResponseEntity<HttpStatus> createAlert() throws IOException {
+        Alert alert = Alert.builder()
+                .alert_id(12345)
+                .description("ba lalala")
+                .active(true)
+                .expression("a > b")
+                .symbol("Test")
+                .build();
+
+        System.out.println("alert "+ alert.getAlert_id());
+        alertService.saveAlert( alert);
+        return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
+    }
+
+
 }

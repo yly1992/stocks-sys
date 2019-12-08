@@ -2,7 +2,6 @@ package controller;
 
 import model.IStockWrapper;
 import model.Quote;
-import model.QuoteId;
 import service.IStockService;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,35 +37,30 @@ public class StockController {
    public IStockWrapper get(@PathVariable("symbol") String symbol ) throws IOException {
       return stockService.getStock( symbol );
    }
-   
-   @RequestMapping(method = RequestMethod.GET)
-   public Collection<IStockWrapper> get( @RequestParam("symbols") String[] symbols ) throws IOException {
-	   Map<String,IStockWrapper> resultMap = stockService.getStocks( symbols );
-	   for(String stock : resultMap.keySet()) {
-		   System.out.println(" stcok " + resultMap.get(stock).getSymbol() + " " + resultMap.get(stock).getLastQuote() );
-	   }
-	   return null;
-       
-   }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public Collection<IStockWrapper> get( @RequestParam("symbols") String[] symbols ) throws IOException {
+        return stockService.getStocks( symbols ).values();
+    }
    
    @RequestMapping(value= "/history/{symbol:.+}", method = RequestMethod.GET)
    public List<Quote> getHistory(@PathVariable("symbol") String symbol ) throws IOException {
-	   System.out.println("balalallal" + stockService.getHistory( symbol ).size());
-      return stockService.getHistory( symbol );
+      return stockService.getOneYearHistory( symbol );
    }
-   
-   @RequestMapping(value= "/historyyear/{year:.+}", method = RequestMethod.GET)
-   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year ) throws IOException {
-	   System.out.println("year "+ year);
-      stockService.autoUpdateDBHistory( year );
-      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
-   }
-   
-   @RequestMapping(value= "/history/{year}/{symbol:.+}", method = RequestMethod.GET)
-   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year, @PathVariable("symbol") String symbol ) throws IOException {
-      stockService.updateDBHistory( year, symbol );
-      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
-   }
+
+//
+//   @RequestMapping(value= "/historyyear/{year:.+}", method = RequestMethod.GET)
+//   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year ) throws IOException {
+//	   System.out.println("year "+ year);
+//      stockService.autoUpdateDBHistory( year );
+//      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
+//   }
+//
+//   @RequestMapping(value= "/history/{year}/{symbol:.+}", method = RequestMethod.GET)
+//   public ResponseEntity<HttpStatus> loadHistory( @PathVariable("year") Integer year, @PathVariable("symbol") String symbol ) throws IOException {
+//      stockService.updateDBHistory( year, symbol );
+//      return new ResponseEntity<HttpStatus> ( HttpStatus.OK );
+//   }
    
 //   @RequestMapping( value = "/import/csv", method = RequestMethod.POST )
 //   public ResponseEntity<HttpStatus> importQuotes( @RequestParam( value = "symbol" ) String symbol,

@@ -11,6 +11,8 @@ import java.util.Map;
 public interface IStockService {
    
    public IStockWrapper getStock( String symbol ) throws IOException;
+
+   public List<Quote> getOneYearHistory( String symbol ) throws IOException;
    
    public Map<String,IStockWrapper> getStocks( String[] symbol ) throws IOException;
    

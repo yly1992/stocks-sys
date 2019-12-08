@@ -7,15 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +22,7 @@ import yahoofinance.histquotes.HistoricalQuote;
 
 @Service
 @EnableScheduling
-
-public class StockService implements IStockService{
+public class StockService implements IStockService {
    
    @Autowired
    private QuoteDAO quoteDAO;
@@ -38,6 +34,8 @@ public class StockService implements IStockService{
    private Boolean usingDB;
 
    public IStockWrapper getStock( String symbol ) throws IOException{
+	   StockWrapper sw = new StockWrapper( yahooFinanceService.getStock( normalizeSymbol( symbol )));
+	   quoteDAO.update(sw.getLastQuote());
       return new StockWrapper( yahooFinanceService.getStock( normalizeSymbol( symbol ) ) );
    }
    
@@ -50,26 +48,19 @@ public class StockService implements IStockService{
 	      }
 	      return resultMap;
 	   }
-  
-   private String normalizeSymbol(String symbol){
-      return symbol.toUpperCase().trim();
-   }
-   
-   private String[] normalizeSymbols(String[] symbols){
-      for(int i = 0; i < symbols.length; i++){
-         symbols[i] = normalizeSymbol( symbols[i] );
-      }
-      return symbols;
-   }
 
    /**
     * Return a year of quotes from a symbol
     */
-   public List<Quote> getHistory( String symbol ) throws IOException{
+   public List<Quote> getOneYearHistory( String symbol ) throws IOException{
       Calendar yearAgo = Calendar.getInstance();
       yearAgo.add( Calendar.YEAR, -1 );
       return getHistory( symbol, yearAgo, Calendar.getInstance() );
    }
+
+	public List<Quote> getHistory( String symbol ) throws IOException{
+		return new ArrayList<>();
+	}
 
    public List<Quote> getHistory( String symbol, Calendar from, Calendar to ) throws IOException{
 	      return getHistory( new String[]{ normalizeSymbol( symbol )}, from, to ).get( symbol );
@@ -79,7 +70,7 @@ public class StockService implements IStockService{
 	      normalizeSymbols( symbols );
 	      Map<String, List<Quote>> resultMap = new HashMap<String, List<Quote>>();
 	      if( usingDB ){
-	         resultMap = quoteDAO.findByRangeInBulk( symbols, from, to );
+	      	 resultMap = quoteDAO.findByRangeInBulk( symbols, from, to );
 	         updateMissingQuotes( symbols, from, to, resultMap );
 	         System.out.println("update missing quotes succeed");
 	      }else{
@@ -109,7 +100,7 @@ public class StockService implements IStockService{
 	      }
 	      
 	      if( missedSymbols.size() > 0 ){
-	    	  System.out.println("  missedSymbols.size() > 0 ");
+	      	 System.out.println("  missedSymbols.size() > 0 ");
 	         Map<String, List<Quote>> missedMap = autoLoadDB( missedSymbols.toArray(new String[missedSymbols.size()]), from, to );
 	         resultMap.putAll( missedMap );
 	      }
@@ -207,8 +198,18 @@ public List<String> getSymbols(){
 
 public void updateDBJob() {
 	// TODO Auto-generated method stub
-	
+
 }
 
+	private String normalizeSymbol(String symbol){
+		return symbol.toUpperCase().trim();
+	}
+
+	private String[] normalizeSymbols(String[] symbols){
+		for(int i = 0; i < symbols.length; i++){
+			symbols[i] = normalizeSymbol( symbols[i] );
+		}
+		return symbols;
+	}
    
 }

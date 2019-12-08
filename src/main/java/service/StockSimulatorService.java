@@ -90,4 +90,8 @@ public class StockSimulatorService implements IStockService {
    public void updateDBHistory( Integer year, String symbol ) {
    }
 
+   public List<Quote> getOneYearHistory(String symbol ) {
+      return new ArrayList<>();
+   }
+
 }
