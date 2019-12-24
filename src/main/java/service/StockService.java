@@ -35,7 +35,6 @@ public class StockService implements IStockService {
 
    public IStockWrapper getStock( String symbol ) throws IOException{
 	   StockWrapper sw = new StockWrapper( yahooFinanceService.getStock( normalizeSymbol( symbol )));
-	   quoteDAO.update(sw.getLastQuote());
       return new StockWrapper( yahooFinanceService.getStock( normalizeSymbol( symbol ) ) );
    }
    
@@ -55,7 +54,7 @@ public class StockService implements IStockService {
    public List<Quote> getOneYearHistory( String symbol ) throws IOException{
       Calendar yearAgo = Calendar.getInstance();
       yearAgo.add( Calendar.YEAR, -1 );
-      return getHistory( symbol, yearAgo, Calendar.getInstance() );
+      return yahooFinanceService.getHistory( symbol, yearAgo, Calendar.getInstance() );
    }
 
 	public List<Quote> getHistory( String symbol ) throws IOException{
@@ -83,6 +82,7 @@ public class StockService implements IStockService {
    private void fillHistoryFromYahooService( String[] symbols, Calendar from, Calendar to,
            Map<String, List<Quote>> resultMap ) throws IOException {
 	   Map<String, List<HistoricalQuote>> historyMap = yahooFinanceService.getHistory( symbols, from, to );
+	   System.out.println(historyMap);
 	   for( String symbol : historyMap.keySet() ){
 		   resultMap.put( symbol, historyToQuotes( historyMap.get( symbol ) ));
 	   }
@@ -167,21 +167,21 @@ public void autoUpdateDBHistory( Integer year ) {
 
 @Transactional
 public void updateDBHistory( Integer year, String symbol ) {
-   if(year == null || symbol == null){
-      return;
-   }
-   Calendar from = Calendar.getInstance();
-   from.set( Calendar.YEAR, year );
-   from.set( Calendar.MONTH, 0 );
-   from.set( Calendar.DATE, 1 );
-   List<HistoricalQuote> history;
-   try {
-      history = yahooFinanceService.getHistory( symbol, from, Calendar.getInstance() );
-      importQuotes( historyToQuotes( history ) );
-   } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException( e.getMessage() );
-   }
+//   if(year == null || symbol == null){
+//      return;
+//   }
+//   Calendar from = Calendar.getInstance();
+//   from.set( Calendar.YEAR, year );
+//   from.set( Calendar.MONTH, 0 );
+//   from.set( Calendar.DATE, 1 );
+//   List<HistoricalQuote> history;
+//   try {
+//      history = yahooFinanceService.getHistory( symbol, from, Calendar.getInstance() );
+//      importQuotes( historyToQuotes( history ) );
+//   } catch (IOException e) {
+//      e.printStackTrace();
+//      throw new RuntimeException( e.getMessage() );
+//   }
 }
 
 @Transactional

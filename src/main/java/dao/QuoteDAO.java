@@ -1,22 +1,29 @@
 package dao;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
-import com.amazonaws.services.dynamodbv2.model.PutItemResult;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import lombok.SneakyThrows;
 import model.Quote;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,61 +46,46 @@ public class QuoteDAO {
       return findByRangeInBulk(new String[]{ symbol }, from, to).get( symbol );
    }
 
-//   public Map<String, List<Quote>> findByRangeInBulk( String[] symbols, Calendar from, Calendar to ) {
-//
-//      QueryRequest queryRequest = new QueryRequest()
-//              .withTableName("Quotes")
-//              .withKeyConditionExpression("#symbol =:symbol");
-//
-//      QueryResult queryResult = client.query(queryRequest);
-//      List<Map<String,AttributeValue>> items = new ArrayList<>();
-//
-//
-//      for(Quote quote: list){
-//         putQuoteInMap( quote, resultMap );
-//      }
-//      return resultMap;
-//   }
+   @SneakyThrows
+   public Map<String, List<Quote>> findByRangeInBulk( String[] symbols, Calendar from, Calendar to ) {
+      Map<String, List<Quote>>  symbolToQuotes = new HashMap<>();
+      for (String symbol : symbols) {
+         symbolToQuotes.put(symbol,new ArrayList<>());
+         QuerySpec spec = new QuerySpec()
+                 .withKeyConditionExpression("symbol = :v_symbol and time_stamp BETWEEN :v_from_dt_tm AND :v_to_dt_tm")
+                 .withValueMap(new ValueMap().withString(":v_symbol", symbol)
+                         .withLong(":v_to_dt_tm", to.getTimeInMillis())
+                         .withLong(":v_from_dt_tm", from.getTimeInMillis())
+                 );
+         ItemCollection<QueryOutcome> items = table.query(spec);
+         System.out.println("\nfindsomething results:");
+         Iterator<Item> iterator = items.iterator();
+         while (iterator.hasNext()) {
+            Map<String, Object> item = iterator.next().asMap();
+            Calendar c = Calendar.getInstance();
+            Date d = new Date(Long.parseLong(item.get("time_stamp") + ""));
+            c.setTime(d);
+            symbolToQuotes.get(symbol).add(Quote.builder()
+                    .symbol(item.get("symbol") +"")
+                    .date(c)
+                    .open(new BigDecimal(item.get("openPrice") + ""))
+                    .close(new BigDecimal(item.get("closePrice") + ""))
+                    .high(new BigDecimal(item.get("highPrice") + ""))
+                    .low(new BigDecimal(item.get("lowPrice") + ""))
+                    .volume(Long.parseLong(item.get("volume") + ""))
+                    .build()
+            );
+         }
+      }
+      System.out.println(symbolToQuotes);
+      return symbolToQuotes;
 
-   public List<Map<String ,AttributeValue>> findByRangeInBulk(String symbol, Calendar from, Calendar to) {
-
-      List<Map<String,AttributeValue>> items = new ArrayList<>();
-
-      Map<String,String> expressionAttributesNames = new HashMap<>();
-      expressionAttributesNames.put("#symbol","symbol");
-      expressionAttributesNames.put("#date","date");
-
-      Map<String,AttributeValue> expressionAttributeValues = new HashMap<>();
-      expressionAttributeValues.put(":emailValue",new AttributeValue().withS(symbol));
-      expressionAttributeValues.put(":from",new AttributeValue().withN(Long.toString(from.getTimeInMillis())));
-      expressionAttributeValues.put(":to",new AttributeValue().withN(Long.toString(to.getTimeInMillis())));
-
-      QueryRequest queryRequest = new QueryRequest()
-              .withTableName("Quotes")
-              .withKeyConditionExpression("#email = :emailValue and #timestamp BETWEEN :from AND :to ");
-
-      Map<String,AttributeValue> lastKey = null;
-
-      do {
-
-         QueryResult queryResult = client.query(queryRequest);
-         List<Map<String,AttributeValue>> results = queryResult.getItems();
-         items.addAll(results);
-         lastKey = queryResult.getLastEvaluatedKey();
-         queryRequest.setExclusiveStartKey(lastKey);
-      } while (lastKey!=null);
-
-      return items;
    }
 
    public List<String> getLoadedSymbols() {
       return new ArrayList<>();
    }
 
-   public Map<String, List<Quote>> findByRangeInBulk( String[] symbols, Calendar from, Calendar to ) {
-      Map<String, List<Quote>> resultMap = new HashMap<String, List<Quote>>();
-      return resultMap;
-   }
 
    private void putQuoteInMap( Quote quote, Map<String, List<Quote>> map ) {
       List<Quote> internalList = map.get( quote.getSymbol() );
@@ -111,7 +103,7 @@ public class QuoteDAO {
    public void update( Quote quote ) {
 
       UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("symbol", quote.getSymbol(),
-              "time_stamp", String.valueOf(quote.getDate().getTimeInMillis()))
+              "time_stamp", quote.getDate().getTimeInMillis())
               .withUpdateExpression("set openPrice = :r, lowPrice=:p, highPrice=:a, closePrice=:d, volume=:c")
               .withValueMap(new ValueMap().withNumber(":r", quote.getOpen())
                       .withNumber(":p", quote.getLow())

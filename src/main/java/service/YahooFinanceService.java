@@ -1,19 +1,36 @@
 package service;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpRequest;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.SneakyThrows;
+import model.Quote;
 import org.springframework.stereotype.Service;
+import transformer.FormatterHelper;
+import transformer.Java11HttpClient;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
-import yahoofinance.histquotes.Interval;
+
 
 @Service
 public class YahooFinanceService {
-   
+
+   private static final String BASEURL = "https://finnhub.io/api/v1/";
+   private static final String APIKEY = "&token=bntbl87rh5rfc44snao0";
+   private static final String CANDLE = "stock/candle?resolution=D&symbol=";
+   private static final String FROM = "&from=";
+   private static final String TO = "&to=";
+
+   public FormatterHelper formatterHelper = new FormatterHelper();
+
+   public Java11HttpClient java11HttpClient = new Java11HttpClient();
+
    public Stock getStock( String symbol ) throws IOException{
       return YahooFinance.get( symbol, true );
    }
@@ -28,8 +45,22 @@ public class YahooFinanceService {
     * @return
     * @throws IOException
     */
-   public List<HistoricalQuote> getHistory( String symbol, Calendar from, Calendar to ) throws IOException{
-      return getHistory( new String[]{ symbol }, from, to ).get( symbol );
+   @SneakyThrows
+   public List<Quote> getHistory(String symbol, Calendar from, Calendar to ) throws IOException{
+      symbol = symbol.substring(8);
+      String fromTime = formatterHelper.calendarToTimestamp(from).substring(0,10);
+      String toTime = formatterHelper.calendarToTimestamp(to).substring(0,10);
+      String candleurl = BASEURL + CANDLE + symbol + FROM + fromTime + TO + toTime + APIKEY;
+      System.out.println("@@@@@@");
+      System.out.println(candleurl);
+      HttpRequest request = HttpRequest.newBuilder()
+              .GET()
+              .uri(URI.create(candleurl))
+              .setHeader("liyuy", "Java 11 HttpClient Bot")
+              .build();
+      String result = java11HttpClient.sendGet(request);
+      System.out.println(result);
+      return null;
    }
    
    /**
@@ -41,15 +72,9 @@ public class YahooFinanceService {
     * @throws IOException
     */
    public Map<String, List<HistoricalQuote>> getHistory( String[] symbols, Calendar from, Calendar to ) throws IOException{
-      Map<String, Stock> map = YahooFinance.get( symbols );
       Map<String, List<HistoricalQuote>> resultMap = new HashMap<String, List<HistoricalQuote>>();
       for(String symbol : symbols){
-         Stock stock = map.get( symbol );
-         if( stock == null){
-            System.err.println( "Could not get History from symbol: " + symbol );
-            continue;
-         }
-         resultMap.put( symbol, stock.getHistory( from, to, Interval.DAILY ) );
+
       }
       return resultMap;
    }

@@ -35,6 +35,7 @@ public class StockController {
    
    @RequestMapping(value="/{symbol:.+}" ,method = RequestMethod.GET)
    public IStockWrapper get(@PathVariable("symbol") String symbol ) throws IOException {
+       System.out.println("hit here");
       return stockService.getStock( symbol );
    }
 
@@ -43,7 +44,7 @@ public class StockController {
         return stockService.getStocks( symbols ).values();
     }
    
-   @RequestMapping(value= "/history/{symbol:.+}", method = RequestMethod.GET)
+   @RequestMapping(value= "/oneyearhistory/{symbol:.+}", method = RequestMethod.GET)
    public List<Quote> getHistory(@PathVariable("symbol") String symbol ) throws IOException {
       return stockService.getOneYearHistory( symbol );
    }
